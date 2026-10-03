@@ -117,7 +117,8 @@ update public.produtos set ativo = false where nome = 'Moqueca de Peixe';
 -- ---------- Opções dos produtos ----------
 insert into public.grupos_opcoes (restaurante_id, nome, min_escolhas, max_escolhas) values
   ('11111111-1111-4111-8111-111111111111', 'Ponto da carne', 1, 1),
-  ('11111111-1111-4111-8111-111111111111', 'Adicionais', 0, 4),
+  ('11111111-1111-4111-8111-111111111111', 'Adicionais do lanche', 0, 4),
+  ('11111111-1111-4111-8111-111111111111', 'Adicionais do açaí', 0, 6),
   ('11111111-1111-4111-8111-111111111111', 'Borda', 0, 1),
   ('11111111-1111-4111-8111-111111111111', 'Sabor do suco', 1, 1);
 
@@ -125,8 +126,12 @@ insert into public.opcoes (restaurante_id, grupo_id, nome, acrescimo, ordem)
 select '11111111-1111-4111-8111-111111111111', g.id, o.nome, o.acrescimo, o.ordem
 from (values
   ('Ponto da carne', 'Mal passado', 0, 1), ('Ponto da carne', 'Ao ponto', 0, 2), ('Ponto da carne', 'Bem passado', 0, 3),
-  ('Adicionais', 'Queijo', 3.00, 1), ('Adicionais', 'Bacon', 4.00, 2), ('Adicionais', 'Ovo', 2.50, 3),
-  ('Adicionais', 'Cebola caramelizada', 2.00, 4),
+  ('Adicionais do lanche', 'Queijo', 3.00, 1), ('Adicionais do lanche', 'Bacon', 4.00, 2), ('Adicionais do lanche', 'Ovo', 2.50, 3),
+  ('Adicionais do lanche', 'Cebola caramelizada', 2.00, 4),
+  ('Adicionais do açaí', 'Leite condensado', 2.00, 1), ('Adicionais do açaí', 'Leite em pó', 2.00, 2),
+  ('Adicionais do açaí', 'Paçoca', 2.00, 3), ('Adicionais do açaí', 'Granola extra', 2.00, 4),
+  ('Adicionais do açaí', 'Banana extra', 2.00, 5), ('Adicionais do açaí', 'Mel', 2.00, 6),
+  ('Adicionais do açaí', 'Morango', 3.00, 7), ('Adicionais do açaí', 'Creme de avelã', 4.00, 8),
   ('Borda', 'Catupiry', 8.00, 1), ('Borda', 'Cheddar', 8.00, 2),
   ('Sabor do suco', 'Laranja', 0, 1), ('Sabor do suco', 'Limão', 0, 2), ('Sabor do suco', 'Maracujá', 0, 3)
 ) as o(grupo, nome, acrescimo, ordem)
@@ -136,7 +141,8 @@ insert into public.produto_grupos_opcoes (restaurante_id, produto_id, grupo_id, 
 select '11111111-1111-4111-8111-111111111111', p.id, g.id, case g.nome when 'Ponto da carne' then 1 else 2 end
 from public.produtos p
 join public.grupos_opcoes g on
-     (p.nome in ('X-Burger','X-Bacon','X-Salada','Cacau Burger') and g.nome in ('Ponto da carne','Adicionais'))
+     (p.nome in ('X-Burger','X-Bacon','X-Salada','Cacau Burger') and g.nome in ('Ponto da carne','Adicionais do lanche'))
+  or (p.nome = 'Açaí 300 ml' and g.nome = 'Adicionais do açaí')
   or (p.nome = 'Picanha na Brasa' and g.nome = 'Ponto da carne')
   or (p.nome like 'Pizza %' and g.nome = 'Borda')
   or (p.nome = 'Suco Natural' and g.nome = 'Sabor do suco');
