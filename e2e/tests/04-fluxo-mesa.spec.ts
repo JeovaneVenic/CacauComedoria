@@ -11,6 +11,18 @@ import { vigiarErros } from "../helpers/pagina"
 // Coca-Cola 6,00 e Água Mineral 4,00 → subtotal 31,90 + 10% de serviço 3,19 = 35,09.
 
 const MESA = 4
+
+/** Abre a página repetindo se um carregamento anterior ainda em andamento interromper (Safari) */
+async function abrirPagina(page: Page, url: string) {
+  for (let tentativa = 1; ; tentativa++) {
+    try {
+      await page.goto(url)
+      return
+    } catch (e) {
+      if (tentativa >= 3 || !/interrupted by another navigation|Frame load interrupted/.test(String(e))) throw e
+    }
+  }
+}
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }).replace(/ /g, " ")
 
 test.describe.configure({ mode: "serial" })
@@ -88,7 +100,7 @@ test("fluxo completo de uma mesa, do pedido ao pagamento", async ({ browser }) =
     const atual = await mesaPorNumero(MESA)
     const pedidosDaMesa = async () => (await api.from("pedidos").select("numero").eq("atendimento_id", atual.atendimento_id!)).data ?? []
     // exatamente 2 pedidos na mesa: o da fila chegou e não duplicou
-    await expect.poll(async () => (await pedidosDaMesa()).length).toBe(2)
+    await expect.poll(async () => (await pedidosDaMesa()).length, { timeout: 30_000 }).toBe(2)
     for (const { numero } of await pedidosDaMesa()) if (!numerosPedidos.includes(numero)) numerosPedidos.push(numero)
     expect(numerosPedidos).toHaveLength(2)
   })
@@ -120,7 +132,7 @@ test("fluxo completo de uma mesa, do pedido ao pagamento", async ({ browser }) =
 
   await test.step("dono confere a conta: subtotal, serviço e total", async () => {
     const page = dono.page
-    await page.goto(`/admin/conta/${mesa.id}`)
+    await abrirPagina(page, `/admin/conta/${mesa.id}`)
     await expect(page.getByRole("heading", { name: "Conta · Mesa 04" })).toBeVisible()
     await expect(page.getByText(brl(35.09)).first()).toBeVisible()
   })
@@ -147,12 +159,13 @@ test("fluxo completo de uma mesa, do pedido ao pagamento", async ({ browser }) =
     const page = dono.page
     await page.getByRole("button", { name: /Finalizar/ }).click()
     await expect(page).toHaveURL(/\/admin$/)
+    await expect(page.getByRole("heading", { level: 1, name: "Visão geral" })).toBeVisible()
     expect((await mesaPorNumero(MESA)).status).toBe("aguardando_pagamento")
   })
 
   await test.step("dono fecha a conta em Pix e a mesa fica livre", async () => {
     const page = dono.page
-    await page.goto(`/admin/conta/${mesa.id}`)
+    await abrirPagina(page, `/admin/conta/${mesa.id}`)
     await page.getByRole("button", { name: "Pix", exact: true }).click()
     await expect(page.getByRole("status").filter({ hasText: "Valor completo" })).toBeVisible()
     await page.getByRole("button", { name: "Fechar conta" }).click()
@@ -167,7 +180,7 @@ test("fluxo completo de uma mesa, do pedido ao pagamento", async ({ browser }) =
 
   await test.step("auditoria registrou o fechamento com o valor", async () => {
     const page = dono.page
-    await page.goto("/admin/auditoria?periodo=hoje&q=fechou%20a%20mesa%2004")
+    await abrirPagina(page, "/admin/auditoria?periodo=hoje&q=fechou%20a%20mesa%2004")
     await expect(page.getByText(`fechou a mesa 04 — total ${brl(35.09)}`).first()).toBeVisible()
   })
 

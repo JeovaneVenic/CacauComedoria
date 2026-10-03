@@ -93,6 +93,7 @@ test.describe("Telas públicas", () => {
       const erros = vigiarErros(page)
       await page.goto(rota)
       await expect(page.getByRole("heading").first()).toBeVisible()
+      await expect(page.getByRole("button", { name: /Entrar|Enviar/ }).first()).toBeEnabled()
       expect(erros, erros.join("\n")).toEqual([])
       graves.push(...(await violacoesGraves(page, testInfo, nome)))
     }

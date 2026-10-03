@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test"
 import { apiComo } from "../helpers/api"
 import { estado, SENHA, USUARIOS } from "../helpers/env"
+import { irPara } from "../helpers/pagina"
 
 // Autenticação e controle de acesso (OWASP A01 / A07): cada perfil só chega ao que lhe cabe,
 // pela tela e pela API direta.
@@ -25,7 +26,7 @@ test.describe("Entrada no sistema", () => {
   test("sem login, as telas internas levam ao login", async ({ page }) => {
     for (const rota of ["/admin", "/garcom", "/cozinha", "/admin/financeiro", "/imprimir/pre-conta/00000000-0000-4000-8000-000000000000"]) {
       // o redirecionamento pode acontecer durante o carregamento (interrompe o "load")
-        await page.goto(rota, { waitUntil: "commit" })
+        await irPara(page, rota)
       await expect(page, `rota ${rota}`).toHaveURL(/\/login/)
     }
   })
@@ -49,7 +50,7 @@ test.describe("Permissões por perfil (tela)", () => {
     test("não acessa gestão nem cozinha", async ({ page }) => {
       for (const rota of ["/admin", "/admin/financeiro", "/admin/usuarios", "/admin/auditoria", "/admin/estoque", "/cozinha"]) {
         // o redirecionamento pode acontecer durante o carregamento (interrompe o "load")
-        await page.goto(rota, { waitUntil: "commit" })
+        await irPara(page, rota)
         await expect(page, `rota ${rota}`).toHaveURL(/\/garcom$/)
       }
     })
@@ -60,7 +61,7 @@ test.describe("Permissões por perfil (tela)", () => {
     test("não acessa salão nem gestão", async ({ page }) => {
       for (const rota of ["/garcom", "/admin", "/admin/relatorios"]) {
         // o redirecionamento pode acontecer durante o carregamento (interrompe o "load")
-        await page.goto(rota, { waitUntil: "commit" })
+        await irPara(page, rota)
         await expect(page, `rota ${rota}`).toHaveURL(/\/cozinha$/)
       }
     })

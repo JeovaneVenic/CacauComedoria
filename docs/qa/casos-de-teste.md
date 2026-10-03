@@ -24,7 +24,18 @@ Novos arquivos: `05-cadastros`, `06-teclado-leitor`, `07-impressao`, `08-carga` 
 | 3ª (matriz) | 51 ✔ / 1 ✘ | 14 ✔ / 27 ✘ | 12 ✔ / 22 ✘ | DEF-11 (Safari não carregava o app) e DEF-12 (hidratação na Cozinha) |
 | 4ª (telas com relógio, 5 repetições) | 23 ✔ / 0 ✘ | — | — | DEF-12 confirmado como resolvido |
 | 5ª (matriz) | **52 ✔ / 0 ✘** | 34 ✔ / 7 ✘ | 29 ✔ / 5 ✘ | DEF-13 e DEF-14 (Estoque no tablet/celular) e ajustes de teste para o Safari |
-| 6ª (matriz, confirmação) | em andamento | em andamento | em andamento | resultado registrado na próxima atualização deste documento |
+| 6ª (matriz) | 49 ✔ / 3 ✘ | 35 ✔ / 6 ✘ | 32 ✔ / 2 ✘ | regressão no próprio teste: a espera "até as animações terminarem" (AJ-12) nunca acabava nas telas com o indicador "Ao vivo" (AJ-14); casos de tempo do Safari |
+| 7ª (matriz) | 51 ✔ / 1 ✘ | 39 ✔ / 1 ✘ | **34 ✔ / 0 ✘** | fila offline levou mais de 15 s para reenviar (MEL-01); navegação interrompida no iPad |
+| 8ª (matriz) | **52 ✔ / 0 ✘** | 39 ✔ / 1 ✘ | **34 ✔ / 0 ✘** | só a navegação para a auditoria no fluxo do iPad (AJ-15) |
+| 9ª (fluxo do iPad, 3 repetições) | — | **3 ✔ / 0 ✘** | — | AJ-15 e AJ-16 aplicados |
+
+**Resultado final:** Chrome 52/52, iPhone 34/34 e iPad 40/40 (o fluxo completo confirmado em 3 repetições seguidas; o teste de menu pelo teclado é pulado de propósito no iPad, ver AJ-13).
+
+**Melhoria feita durante a rodada:**
+
+| ID | Onde | Antes | Depois | Arquivo |
+|---|---|---|---|---|
+| MEL-01 | Fila de pedidos sem internet | Ao voltar a conexão, tentava enviar uma vez; se essa tentativa falhasse (rede ainda estabilizando), o próximo envio só acontecia 15 s depois | Tenta na hora e de novo 3 s depois (além das tentativas a cada 15 s); sem duplicar, pela mesma chave do pedido | `src/features/orders/components/order-outbox.tsx` |
 
 **Firefox:** não foi testado neste computador. O Windows bloqueia a execução do Firefox de testes do Playwright (`spawn UNKNOWN` ao iniciar o executável, que está íntegro). Liberar exige mudar uma configuração de segurança do Windows, decisão do dono do computador.
 
@@ -71,6 +82,10 @@ Novos arquivos: `05-cadastros`, `06-teclado-leitor`, `07-impressao`, `08-carga` 
 | AJ-11 | Telas (Safari) | O Safari registra como erro requisições que ele mesmo cancela ao trocar de página ("access control checks") | Essas mensagens específicas são ignoradas |
 | AJ-12 | CT-T19 (iPad) | A varredura pegou o botão "Entrar" no meio da animação de desativado para ativo (contraste falso) | Espera as animações terminarem antes da varredura |
 | AJ-13 | CT-K04 (iPad) | No tablet o menu da gestão fica recolhido atrás de um botão | Teste de menu pelo teclado roda só no computador |
+| AJ-14 | Telas (todas) | A espera de AJ-12 aguardava também animações infinitas (indicador "Ao vivo"), e as telas estouravam o tempo | Ignora animações infinitas |
+| AJ-15 | CT-F01 (iPad) | Após fechar a conta, o sistema volta sozinho ao painel e interrompia a próxima navegação do teste | A navegação é repetida se for interrompida |
+| AJ-16 | CT-F01 (iPad) | No modo sem internet, o Safari registra as falhas de rede como "Load failed" e "WebKit encountered an internal error" | Tratadas como esperadas, iguais ao "Failed to fetch" do Chrome |
+| AJ-17 | CT-F01 | O teste esperava o pedido da fila por 15 s, exatamente o intervalo de reenvio | Espera até 30 s (e o sistema ganhou MEL-01) |
 
 ---
 

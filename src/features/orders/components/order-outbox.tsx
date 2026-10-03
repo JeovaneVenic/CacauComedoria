@@ -43,12 +43,20 @@ export function OrderOutboxSync() {
 
     Promise.resolve(useCartStore.persist.rehydrate()).then(flush)
     const onVisible = () => document.visibilityState === "visible" && flush()
-    window.addEventListener("online", flush)
+    // a conexão pode levar alguns segundos para estabilizar: tenta na hora e de novo após 3 s
+    let retentativa: ReturnType<typeof setTimeout> | undefined
+    const onOnline = () => {
+      flush()
+      clearTimeout(retentativa)
+      retentativa = setTimeout(flush, 3_000)
+    }
+    window.addEventListener("online", onOnline)
     document.addEventListener("visibilitychange", onVisible)
     const timer = setInterval(flush, RETRY_MS)
     return () => {
       cancelled = true
-      window.removeEventListener("online", flush)
+      window.removeEventListener("online", onOnline)
+      clearTimeout(retentativa)
       document.removeEventListener("visibilitychange", onVisible)
       clearInterval(timer)
     }
