@@ -27,7 +27,6 @@ export default defineConfig({
   expect: { timeout: 15_000 },
   use: {
     baseURL,
-    channel: "chrome",
     locale: "pt-BR",
     timezoneId: "America/Sao_Paulo",
     trace: "retain-on-failure",
@@ -35,10 +34,31 @@ export default defineConfig({
     navigationTimeout: 30_000,
   },
   projects: [
-    { name: "setup", testDir: "./e2e", testMatch: /auth\.setup\.ts/ },
+    { name: "setup", testDir: "./e2e", testMatch: /auth\.setup\.ts/, use: { channel: "chrome" } },
     {
+      // Chrome instalado: roda tudo (cadastros, impressão em PDF e carga só aqui)
       name: "chrome",
       use: { ...devices["Desktop Chrome"], channel: "chrome", viewport: { width: 1366, height: 820 } },
+      dependencies: ["setup"],
+    },
+    {
+      name: "firefox",
+      use: { ...devices["Desktop Firefox"], viewport: { width: 1366, height: 820 } },
+      testIgnore: /05-cadastros|07-impressao|08-carga/,
+      dependencies: ["setup"],
+    },
+    {
+      // Safari do iPad (o tablet do garçom), na horizontal
+      name: "ipad-safari",
+      use: { ...devices["iPad (gen 7) landscape"] },
+      testIgnore: /05-cadastros|07-impressao|08-carga/,
+      dependencies: ["setup"],
+    },
+    {
+      // Safari do iPhone: telas, acesso e segurança (o fluxo completo usa tablet)
+      name: "iphone-safari",
+      use: { ...devices["iPhone 14"] },
+      testIgnore: /04-fluxo-mesa|05-cadastros|06-teclado|07-impressao|08-carga/,
       dependencies: ["setup"],
     },
   ],

@@ -22,7 +22,8 @@ export function FloorEditor({ tables, sections }: { tables: DiningTable[]; secti
   ]
 
   function newTable(sectionId: string | null) {
-    const inSection = tables.filter((t) => t.setor_id === sectionId && t.ativa)
+    // inclui as desativadas: elas continuam desenhadas no salão e cobririam a mesa nova
+    const inSection = tables.filter((t) => t.setor_id === sectionId)
     // primeira posição livre, varrendo linha por linha
     let pos = { x: 0, y: 0 }
     outer: for (let y = 0; y < 12; y++) {

@@ -24,7 +24,8 @@ test.describe("Entrada no sistema", () => {
 
   test("sem login, as telas internas levam ao login", async ({ page }) => {
     for (const rota of ["/admin", "/garcom", "/cozinha", "/admin/financeiro", "/imprimir/pre-conta/00000000-0000-4000-8000-000000000000"]) {
-      await page.goto(rota)
+      // o redirecionamento pode acontecer durante o carregamento (interrompe o "load")
+        await page.goto(rota, { waitUntil: "commit" })
       await expect(page, `rota ${rota}`).toHaveURL(/\/login/)
     }
   })
@@ -47,7 +48,8 @@ test.describe("Permissões por perfil (tela)", () => {
     test.use({ storageState: estado("garcom") })
     test("não acessa gestão nem cozinha", async ({ page }) => {
       for (const rota of ["/admin", "/admin/financeiro", "/admin/usuarios", "/admin/auditoria", "/admin/estoque", "/cozinha"]) {
-        await page.goto(rota)
+        // o redirecionamento pode acontecer durante o carregamento (interrompe o "load")
+        await page.goto(rota, { waitUntil: "commit" })
         await expect(page, `rota ${rota}`).toHaveURL(/\/garcom$/)
       }
     })
@@ -57,7 +59,8 @@ test.describe("Permissões por perfil (tela)", () => {
     test.use({ storageState: estado("cozinha") })
     test("não acessa salão nem gestão", async ({ page }) => {
       for (const rota of ["/garcom", "/admin", "/admin/relatorios"]) {
-        await page.goto(rota)
+        // o redirecionamento pode acontecer durante o carregamento (interrompe o "load")
+        await page.goto(rota, { waitUntil: "commit" })
         await expect(page, `rota ${rota}`).toHaveURL(/\/cozinha$/)
       }
     })

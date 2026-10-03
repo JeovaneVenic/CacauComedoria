@@ -18,6 +18,8 @@ export function friendlyError(error: unknown, fallback = "Algo deu errado. Tente
   if (e.code === "23505") return "Já existe um registro com esses dados."
   if (e.code === "23503") return "Este registro está em uso e não pode ser excluído."
   if (/Invalid login credentials/i.test(message)) return "E-mail ou senha incorretos."
+  // usuário desativado pela gestão (o Supabase bloqueia o login)
+  if (/banned/i.test(message)) return "Seu acesso está desativado. Fale com o responsável pelo restaurante."
   if (/Email not confirmed/i.test(message)) return "Confirme seu e-mail antes de entrar."
   if (/rate limit|too many/i.test(message)) return "Muitas tentativas. Aguarde alguns instantes."
   if (/Password should be at least/i.test(message)) return "A senha deve ter pelo menos 8 caracteres."

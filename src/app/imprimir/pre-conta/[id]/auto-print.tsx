@@ -36,7 +36,6 @@ export function AutoPrint({ auto, backHref, homeHref, atendimentoId, billRequest
   const [finishing, setFinishing] = useState(false)
 
   useEffect(() => {
-    if (!auto) return
     let cancelled = false
     // espera o logo e as fontes carregarem para a impressão sair completa (no máximo 3 s)
     const ready = Promise.all([
@@ -45,7 +44,20 @@ export function AutoPrint({ auto, backHref, homeHref, atendimentoId, billRequest
     ])
     const timeout = new Promise((r) => setTimeout(r, 3000))
     Promise.race([ready, timeout]).then(() => {
-      if (!cancelled) setTimeout(() => window.print(), 100)
+      if (cancelled) return
+      // página exatamente do tamanho do cupom: 80 mm de largura e a altura do conteúdo (bobina contínua)
+      const cupom = document.querySelector<HTMLElement>("main.cupom")
+      if (cupom) {
+        const alturaMm = Math.ceil((cupom.scrollHeight * 25.4) / 96) + 4
+        let estilo = document.getElementById("pagina-cupom")
+        if (!estilo) {
+          estilo = document.createElement("style")
+          estilo.id = "pagina-cupom"
+          document.head.appendChild(estilo)
+        }
+        estilo.textContent = `@page { size: 80mm ${alturaMm}mm; margin: 0; }`
+      }
+      if (auto) setTimeout(() => window.print(), 100)
     })
     return () => {
       cancelled = true

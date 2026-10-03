@@ -165,6 +165,12 @@ Suíte de ponta a ponta com [Playwright](https://playwright.dev) e [axe-core](ht
 | `02-seguranca` | Cabeçalhos de segurança, service worker, manifesto do app, redirecionamento aberto e página 404 |
 | `03-telas` | **Todas as telas** de cada perfil abrem sem erro de console nem falha de servidor, passam na varredura de **acessibilidade WCAG 2.2 AA** (zero violações sérias/críticas) e as do garçom cabem no celular e no tablet |
 | `04-fluxo-mesa` | Fluxo completo com garçom, cozinha e dono ao mesmo tempo: abrir mesa → açaí com adicionais → **pedido sem internet** (fila, sem duplicar) → cozinha prepara → entrega → conta (R$ 35,09) → **pré-conta impressa** → Finalizar → fechar em Pix → mesa livre → auditoria |
+| `05-cadastros` | Formulários de categoria, produto, grupo de adicionais, despesa, fornecedor, mesa, item de estoque, configurações e usuário: validação, criar, editar e excluir/desativar |
+| `06-teclado-leitor` | Uso só pelo teclado (login, pedido com adicionais, menu) e estrutura para leitor de tela (títulos, regiões, nomes, erros e avisos anunciados) |
+| `07-impressao` | Pré-conta no modo de impressão e em PDF com **80 mm** de largura, sem cortes e sem os botões da tela |
+| `08-carga` | 10 tablets lançando 30 pedidos ao mesmo tempo, o mesmo pedido enviado 8 vezes em paralelo (vira 1) e 20 telas abertas juntas |
+
+Navegadores: Chrome, **iPad e iPhone (Safari/WebKit)** e Firefox (configurado; neste computador o Windows bloqueia o Firefox de testes).
 
 Os casos de teste, os resultados de cada rodada e os defeitos encontrados e resolvidos estão em [docs/qa/casos-de-teste.md](docs/qa/casos-de-teste.md).
 

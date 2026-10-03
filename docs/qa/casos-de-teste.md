@@ -13,6 +13,21 @@ Relatório da rodada de QA de 03/10/2026, feita com a suíte de ponta a ponta em
 
 **Ambiente:** versão de produção (`npm run build` + `npm run start -- -p 3001`), Google Chrome 1366×820 (garçom também em 390×844 e 820×1180), banco Supabase com os dados de demonstração, usuários `dono`, `joao` (garçom) e `cozinha` do `supabase/seed.sql`.
 
+### Rodada 2 — cobertura ampliada (cadastros, navegadores, teclado, impressão e carga)
+
+Novos arquivos: `05-cadastros`, `06-teclado-leitor`, `07-impressao`, `08-carga` e os navegadores **iPad (Safari/WebKit)** e **iPhone 14 (Safari/WebKit)** além do Chrome. Total: **171 testes** na matriz.
+
+| Rodada | Chrome | iPad (Safari) | iPhone (Safari) | Observação |
+|---|---|---|---|---|
+| 1ª (novos arquivos, só Chrome) | 14 ✔ / 6 ✘ | — | — | DEF-08, DEF-09 e DEF-10 encontrados; 4 ajustes de teste |
+| 2ª (só Chrome) | 19 ✔ / 1 ✘ | — | — | suspeita de foco perdido ao fechar janelas — **descartada** (era o teste lendo antes da animação terminar; conferido com os componentes originais) |
+| 3ª (matriz) | 51 ✔ / 1 ✘ | 14 ✔ / 27 ✘ | 12 ✔ / 22 ✘ | DEF-11 (Safari não carregava o app) e DEF-12 (hidratação na Cozinha) |
+| 4ª (telas com relógio, 5 repetições) | 23 ✔ / 0 ✘ | — | — | DEF-12 confirmado como resolvido |
+| 5ª (matriz) | **52 ✔ / 0 ✘** | 34 ✔ / 7 ✘ | 29 ✔ / 5 ✘ | DEF-13 e DEF-14 (Estoque no tablet/celular) e ajustes de teste para o Safari |
+| 6ª (matriz, confirmação) | em andamento | em andamento | em andamento | resultado registrado na próxima atualização deste documento |
+
+**Firefox:** não foi testado neste computador. O Windows bloqueia a execução do Firefox de testes do Playwright (`spawn UNKNOWN` ao iniciar o executável, que está íntegro). Liberar exige mudar uma configuração de segurança do Windows, decisão do dono do computador.
+
 ---
 
 ## Defeitos encontrados e resolvidos
@@ -27,6 +42,18 @@ Relatório da rodada de QA de 03/10/2026, feita com a suíte de ponta a ponta em
 | DEF-06 | Baixa | Garçom › Novo pedido | Tela sem título principal (h1) para leitores de tela | Cabeçalho só com link e busca | Título "Novo pedido · Mesa NN" visível para leitores de tela | `src/app/garcom/mesa/[id]/pedido/order-builder.tsx` | CT-T17 |
 | DEF-07 | Baixa | Pré-conta, cozinha, conta e detalhes do pedido | Adicionais em ordem aleatória (cupom mostrava "Morango, Leite condensado"; o garçom tinha escolhido na ordem do cardápio) | O banco não garante a ordem dos adicionais gravados no pedido | Adicionais ordenados pela ordem do cardápio em todas as telas; cupom usa o mesmo separador " · " | `src/services/orders.ts`, `src/app/imprimir/pre-conta/[id]/page.tsx` | CT-F01 (passo 7) |
 
+#### Rodada 2
+
+| ID | Gravidade | Onde | O que estava errado | Causa | Correção | Arquivo | Verificado por |
+|---|---|---|---|---|---|---|---|
+| DEF-08 | Média | Tela de entrada | Pessoa desativada via "Não foi possível entrar. Tente novamente." e tentava de novo à toa | A resposta "User is banned" do Supabase não tinha tradução | Mensagem "Seu acesso está desativado. Fale com o responsável pelo restaurante." | `src/lib/errors.ts` | CT-C08 |
+| DEF-09 | Alta | Pré-conta impressa | Página montada em tamanho Carta (215,9 mm) e encolhida na bobina de 80 mm (texto minúsculo) | `@page { size: 80mm auto }` é inválido em CSS e o navegador descartava a regra | Página de 80 mm com a altura medida do próprio cupom (sem papel em branco) | `src/app/imprimir/pre-conta/[id]/page.tsx`, `auto-print.tsx` | CT-I01 |
+| DEF-10 | Média | Mesas › Nova mesa | Mesa nova criada na mesma posição de uma mesa desativada; impossível clicar para editar | A posição livre ignorava as mesas desativadas, que continuam desenhadas no salão | Posição livre considera todas as mesas do setor | `src/app/admin/mesas/floor-editor.tsx` | CT-C05 |
+| DEF-11 | Alta | Todo o sistema no **Safari (iPhone/iPad)** acessado por `http://` | Botões não respondiam e nada funcionava: o app nunca "ligava" | A política de segurança tinha `upgrade-insecure-requests`; o Safari aplica até em `localhost` e IPs da rede local e buscava os arquivos em `https://` inexistente | Diretiva removida (o HTTPS em produção vem da hospedagem + HSTS) | `next.config.ts` | CT-X (iPad e iPhone) |
+| DEF-12 | Baixa | Cozinha (e telas com relógio: salão, pedidos, notificações) | Erro de hidratação do React (#418) e tela redesenhada inteira no navegador quando a virada de minuto caía entre servidor e navegador | Cada lado usava o próprio relógio na primeira renderização | O layout envia o horário da renderização no servidor; os relógios começam por ele e logo passam à hora do aparelho | `src/hooks/use-now.ts`, `src/components/providers/*`, `src/app/layout.tsx` | CT-T18 (5 repetições) |
+| DEF-13 | Média | Estoque no tablet/celular (Safari) | Chaves "Baixa automática" e "Só produtos sem ficha" sem nome para leitores de tela | Rótulo associado ao campo escondido, não ao controle | `aria-label` nas duas chaves | `src/app/admin/estoque/inventory-view.tsx` | CT-T06 a CT-T08 (iPad e iPhone) |
+| DEF-14 | Baixa | Estoque › Movimentações no celular | Tabela com rolagem lateral não podia ser rolada pelo teclado | Contêiner rolável sem foco | Contêiner com foco, papel de região e anel de foco | `src/app/admin/estoque/inventory-view.tsx` | CT-T08 (iPhone) |
+
 ### Ajustes feitos nos testes (não eram defeitos do sistema)
 
 | ID | Teste | Problema no teste | Ajuste |
@@ -35,6 +62,15 @@ Relatório da rodada de QA de 03/10/2026, feita com a suíte de ponta a ponta em
 | AJ-02 | CT-S05 | Abria um endereço inexistente sem login e era levado (corretamente) para a tela de entrada | Roda logado como dono |
 | AJ-03 | CT-F01 | Esperava os adicionais separados por vírgula; o sistema usa " · " | Expectativa corrigida |
 | AJ-04 | CT-F01 | Clicava "Marcar como entregue" duas vezes seguidas, antes da tela atualizar | Espera a tela atualizar após cada entrega |
+| AJ-05 | CT-C02 | Conferia uma caixa de seleção nativa como se fosse um componente com `aria-checked` | Usa a verificação de "marcado" do navegador |
+| AJ-06 | CT-C06 | O rótulo "Unidade" também casava com "Custo por **unidade**" | Busca pelo rótulo exato |
+| AJ-07 | CT-C08 | A janela que deveria entrar como o usuário de teste herdava a sessão do dono | Janela aberta sem sessão |
+| AJ-08 | CT-K02 | Lia o foco antes de a animação de fechar terminar | Espera o foco voltar ao produto (sem tempo fixo) |
+| AJ-09 | CT-F01 | O aviso "pedido enviado" após voltar a internet podia ficar empilhado sob outros avisos | Confere no banco que o pedido da fila chegou e que a faixa da fila sumiu |
+| AJ-10 | CT-P01/P02 (Safari) | O redirecionamento por perfil acontece durante o carregamento e interrompia a navegação do teste | Navega até o primeiro byte e então confere o endereço final |
+| AJ-11 | Telas (Safari) | O Safari registra como erro requisições que ele mesmo cancela ao trocar de página ("access control checks") | Essas mensagens específicas são ignoradas |
+| AJ-12 | CT-T19 (iPad) | A varredura pegou o botão "Entrar" no meio da animação de desativado para ativo (contraste falso) | Espera as animações terminarem antes da varredura |
+| AJ-13 | CT-K04 (iPad) | No tablet o menu da gestão fica recolhido atrás de um botão | Teste de menu pelo teclado roda só no computador |
 
 ---
 
@@ -119,13 +155,64 @@ Dados: Açaí 300 ml R$ 16,90 + Leite condensado R$ 2,00 + Morango R$ 3,00; Coca
 
 ---
 
-## Fora do escopo desta rodada
+### Cadastros — `e2e/tests/05-cadastros.spec.ts` (Chrome)
 
-- Firefox, Safari e iPhone/iPad (só Chrome foi testado).
-- Impressão em impressora térmica física (testado o cupom na tela, não o papel).
-- Carga com vários tablets e muitos pedidos simultâneos.
-- Teste manual com leitor de tela (NVDA/VoiceOver) e navegação completa só por teclado.
-- Telas de cadastro com formulários (criar produto, despesa, usuário, item de estoque) foram verificadas nas fases de desenvolvimento, mas ainda não têm caso automatizado.
+Registros de teste começam com "QA " e são removidos ao final; item de estoque com movimentação e usuário não podem ser excluídos pelo sistema, então ficam **desativados** e são reaproveitados na rodada seguinte.
+
+| ID | Título | Passos principais | Resultado esperado |
+|---|---|---|---|
+| CT-C01 | Categoria do cardápio | Criar "QA Categoria" → renomear → excluir | Avisos "Categoria criada.", "Categoria renomeada.", "Categoria excluída."; some da lista |
+| CT-C02 | Produto | Salvar vazio (validação) → cadastrar "QA Produto Teste" R$ 12,50 em Sobremesas com "Adicionais do açaí" → editar para R$ 13,90 → marcar indisponível → excluir | Erro de validação visível; grupo ligado continua marcado; preço novo na lista; "marcado como indisponível"; "excluído" |
+| CT-C03 | Grupo de adicionais | Criar "QA Coberturas" com 2 opções → remover a 2ª → excluir o grupo | "Grupo criado.", "Grupo atualizado." (opção removida some), "Grupo excluído." |
+| CT-C04 | Despesa | Valor "abc" (validação) → lançar R$ 1,23 em Outros → editar para R$ 2,34 → excluir | Erro visível; "Despesa lançada."; linha mostra R$ 2,34; "Despesa excluída." |
+| CT-C05 | Mesa | Criar mesa 99 com 2 lugares → editar para 3 → excluir | "Mesa 99 criada.", "Mesa atualizada.", "Mesa 99 excluída." (falhava com DEF-10) |
+| CT-C06 | Item de estoque | Cadastrar "QA Item Teste" (2 kg, mínimo 1) → entrada 1 → saída 0,5 sem motivo (bloqueada) e com "Vencido" → contagem 2 → desativar | Avisos de cada movimento; saldo final "2 kg"; "Item atualizado." |
+| CT-C07 | Configurações | Alterar telefone → recarregar → restaurar | Valor novo persiste após recarregar; original restaurado |
+| CT-C08 | Usuário | Senha curta (validação) → cadastrar "QA Garçom Teste" → mudar para Cozinha → redefinir senha → entrar com a nova → desativar → tentar entrar | Pessoa entra e cai em `/cozinha`; após desativar, "Seu acesso está desativado." (DEF-08) |
+
+### Teclado e leitor de tela — `e2e/tests/06-teclado-leitor.spec.ts`
+
+| ID | Título | Resultado esperado |
+|---|---|---|
+| CT-K01 | Login só pelo teclado (Tab até os campos, Enter para entrar) | Foco visível em cada campo; entra na tela do garçom |
+| CT-K02 | Pedido com adicionais só pelo teclado | Tab até a busca e o produto; Enter abre a janela com o foco dentro dela; Espaço marca "Leite condensado"; Esc fecha e o foco volta ao produto |
+| CT-K03 | Estrutura das telas do garçom | Uma região principal, um título h1 e nenhum botão sem nome em Mesas, Meus pedidos e Perfil; navegação identificável |
+| CT-K04 | Menu lateral da gestão pelo teclado (computador) | Foco visível; Enter abre o Financeiro |
+| CT-K05 | Erros de formulário anunciados | Mensagem com `role=alert` e campo com `aria-invalid=true` |
+| CT-K06 | Avisos anunciados | Região viva (`aria-live`) presente para os avisos |
+
+### Impressão — `e2e/tests/07-impressao.spec.ts` (Chrome)
+
+| ID | Título | Resultado esperado |
+|---|---|---|
+| CT-I01 | Pré-conta na bobina de 80 mm | Logo carregado; botões da tela escondidos na impressão; nada passa de 72 mm de largura útil; **PDF com 80 mm de largura** (falhava com DEF-09: 215,9 mm) |
+
+### Carga — `e2e/tests/08-carga.spec.ts` (Chrome)
+
+| ID | Título | Resultado esperado |
+|---|---|---|
+| CT-L01 | 10 tablets × 3 pedidos ao mesmo tempo na mesma mesa | 30 pedidos, nenhum erro, nenhum número repetido; 95% respondidos em menos de 5 s |
+| CT-L02 | O mesmo pedido enviado 8 vezes em paralelo | 1 pedido só no banco |
+| CT-L03 | 20 telas do salão abertas ao mesmo tempo | Todas com status 200; 95% em menos de 8 s |
+
+Limpeza: os pedidos de carga são cancelados com o motivo "Teste de carga" e a mesa 04 fecha com total zero (não gera faturamento). Os cancelamentos aparecem nos relatórios do dia.
+
+### Navegadores — matriz em `playwright.config.ts`
+
+| ID | Navegador | O que roda |
+|---|---|---|
+| CT-X01 | Chrome (computador) | Todos os arquivos |
+| CT-X02 | iPad (Safari/WebKit, horizontal) | Acesso, segurança, telas, fluxo completo da mesa e teclado |
+| CT-X03 | iPhone 14 (Safari/WebKit) | Acesso, segurança e telas |
+| — | Firefox | Configurado, mas bloqueado pelo Windows neste computador (ver Resultado) |
+
+## Fora do escopo
+
+- **Firefox:** configurado na suíte, mas o Windows deste computador bloqueia o navegador de testes.
+- **Impressão física:** o cupom foi validado no modo de impressão e em PDF de 80 mm; falta imprimir na térmica de verdade.
+- **Leitor de tela real:** a estrutura (títulos, regiões, nomes, foco, avisos) é verificada automaticamente, mas um teste manual com NVDA ou VoiceOver continua recomendado.
+- **Safari real:** o WebKit do Playwright reproduz o motor do Safari, mas não substitui um iPhone/iPad físico.
+- **Carga maior:** testados 10 tablets simultâneos; não foi feito teste de resistência por horas.
 
 ## Como reproduzir
 

@@ -286,7 +286,7 @@ function RecipesTab({ products, items, onEdit }: { products: RecipeProduct[]; it
           {withRecipe} de {total} produtos com ficha técnica. Com a baixa automática ligada, cada pedido finalizado desconta esses ingredientes do estoque.
         </p>
         <label className="flex items-center gap-2 text-sm font-semibold">
-          <Switch checked={onlyMissing} onCheckedChange={setOnlyMissing} />
+          <Switch checked={onlyMissing} onCheckedChange={setOnlyMissing} aria-label="Mostrar só produtos sem ficha técnica" />
           Só produtos sem ficha
         </label>
       </div>
@@ -440,7 +440,8 @@ function MovementsTab({
       {list.length === 0 ? (
         <p className="rounded-2xl border border-dashed p-10 text-center font-semibold">Nenhuma movimentação neste período.</p>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border bg-card">
+        // rola para os lados no celular: recebe foco para rolar pelo teclado
+        <div className="overflow-x-auto rounded-2xl border bg-card outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Movimentações do período">
           <table className="w-full text-sm">
             <thead className="bg-muted text-xs text-muted-foreground">
               <tr>
@@ -497,6 +498,7 @@ function AutoDeductionTile({ enabled }: { enabled: boolean }) {
         ) : (
           <Switch
             id="baixa-automatica"
+            aria-label="Baixa automática do estoque"
             checked={enabled}
             onCheckedChange={async (v) => {
               setBusy(true)

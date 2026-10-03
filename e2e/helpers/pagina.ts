@@ -11,9 +11,14 @@ export function vigiarErros(page: Page) {
     if (/Failed to load resource: the server responded with a status of 404/.test(t)) return
     // falhas de rede provocadas de propósito no teste sem internet
     if (/ERR_INTERNET_DISCONNECTED|Failed to fetch|NetworkError/.test(t)) return
+    // Safari: requisições que ele mesmo cancela ao trocar de página (prefetch, tempo real) aparecem como erro
+    if (/due to access control checks|WebSocket is closed before the connection is established/.test(t)) return
     erros.push(`console: ${t}`)
   })
-  page.on("pageerror", (e) => erros.push(`exceção: ${e.message}`))
+  page.on("pageerror", (e) => {
+    if (/due to access control checks/.test(e.message)) return
+    erros.push(`exceção: ${e.message}`)
+  })
   page.on("response", (r) => {
     if (r.status() >= 500) erros.push(`HTTP ${r.status()}: ${r.url()}`)
   })
@@ -28,6 +33,8 @@ export async function telaCarregou(page: Page) {
 
 /** Varredura de acessibilidade (WCAG 2.2 A/AA). Retorna só o que for sério ou crítico. */
 export async function violacoesGraves(page: Page, testInfo: TestInfo, nome: string) {
+  // espera transições terminarem (cores no meio de uma animação dão contraste falso)
+  await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== "running"))
   const resultado = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze()
   await testInfo.attach(`axe-${nome}.json`, { body: JSON.stringify(resultado.violations, null, 2), contentType: "application/json" })
   return resultado.violations

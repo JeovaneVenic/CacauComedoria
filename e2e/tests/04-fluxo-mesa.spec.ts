@@ -82,15 +82,15 @@ test("fluxo completo de uma mesa, do pedido ao pagamento", async ({ browser }) =
     await expect(page.getByText("1 pedido guardado no aparelho", { exact: false })).toBeVisible()
 
     await garcom.ctx.setOffline(false)
-    await toast(page, /Pedido #\d+ da Mesa 04 enviado para a cozinha/)
-    const texto = await page.locator("[data-sonner-toast]").filter({ hasText: /da Mesa 04 enviado/ }).first().textContent()
-    numerosPedidos.push(Number(texto!.match(/#(\d+)/)![1]))
-
-    // exatamente 2 pedidos na mesa (o da fila não duplicou)
+    // a fila esvazia sozinha (a faixa some) e o pedido chega ao banco
+    await expect(page.getByText("pedido guardado no aparelho", { exact: false })).toBeHidden()
     const api = await apiComo("dono")
     const atual = await mesaPorNumero(MESA)
-    const { data } = await api.from("pedidos").select("numero").eq("atendimento_id", atual.atendimento_id!)
-    expect((data ?? []).map((p) => p.numero).sort()).toEqual([...numerosPedidos].sort())
+    const pedidosDaMesa = async () => (await api.from("pedidos").select("numero").eq("atendimento_id", atual.atendimento_id!)).data ?? []
+    // exatamente 2 pedidos na mesa: o da fila chegou e não duplicou
+    await expect.poll(async () => (await pedidosDaMesa()).length).toBe(2)
+    for (const { numero } of await pedidosDaMesa()) if (!numerosPedidos.includes(numero)) numerosPedidos.push(numero)
+    expect(numerosPedidos).toHaveLength(2)
   })
 
   await test.step("cozinha recebe os pedidos e prepara", async () => {
@@ -160,6 +160,8 @@ test("fluxo completo de uma mesa, do pedido ao pagamento", async ({ browser }) =
     await expect(confirmar).toContainText(brl(35.09))
     await confirmar.getByRole("button", { name: "Fechar conta" }).click()
     await toast(page, /Mesa 04 fechada/)
+    // depois de fechar, a tela volta sozinha para o painel
+    await expect(page).toHaveURL(/\/admin$/)
     await expect.poll(async () => (await mesaPorNumero(MESA)).status).toBe("livre")
   })
 

@@ -25,7 +25,8 @@ const csp = [
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
-  ...(isDev ? [] : ["upgrade-insecure-requests"]),
+  // sem "upgrade-insecure-requests": o Safari aplica a regra até em http://localhost e em IPs da rede local,
+  // trocando os arquivos do app para https:// inexistente (a tela não funciona). Em produção o HTTPS vem da hospedagem + HSTS.
 ].join("; ")
 
 const securityHeaders = [

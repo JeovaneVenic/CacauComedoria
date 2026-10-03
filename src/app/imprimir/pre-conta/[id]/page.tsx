@@ -57,7 +57,9 @@ export default async function PreBillPage({ params, searchParams }: PageProps<"/
   return (
     <>
       <style>{`
-        @page { size: 80mm auto; margin: 0; }
+        /* "80mm auto" é inválido em CSS e faria o navegador ignorar a regra (página Carta/A4 encolhida na bobina).
+           Altura provisória; o tamanho exato é calculado pelo AutoPrint a partir do cupom. */
+        @page { size: 80mm 297mm; margin: 0; }
         html, body { background: #fff !important; color: #000 !important; }
         .cupom { width: 72mm; margin: 0 auto; padding: 3mm 0 6mm; font: 12px/1.35 "Segoe UI", Arial, sans-serif; color: #000; }
         .cupom * { color: #000 !important; }
