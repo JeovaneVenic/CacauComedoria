@@ -81,7 +81,7 @@
   --muted-foreground: #63636b;
   --accent: #fdf0e8;             /* tinta suave da marca para seleções */
   --accent-foreground: #8f3614;
-  --destructive: #c62828;
+  --destructive: #b42318; /* 6,6:1 no branco; mantém AA também sobre fundos com 10% de vermelho */
   --border: #e4e4e8;
   --input: #d8d8de;
   --ring: #e07a45;

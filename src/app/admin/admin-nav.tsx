@@ -104,7 +104,7 @@ function SidebarBody({ restaurantName, userName, onNavigate }: { restaurantName:
         <NavList onNavigate={onNavigate} />
       </nav>
       <div className="grid gap-2 border-t border-sidebar-border pt-4">
-        <p className="truncate px-1 text-sm text-sidebar-foreground/70">{userName}</p>
+        <p className="truncate px-1 text-sm text-muted-foreground">{userName}</p>
         <form action="/auth/sair" method="post">
           <button
             type="submit"

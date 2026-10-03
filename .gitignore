@@ -45,3 +45,8 @@ next-env.d.ts
 
 # ferramentas do assistente de código (habilidades e configuração local, não fazem parte do sistema)
 /.claude/
+
+# testes E2E (Playwright)
+/test-results/
+/playwright-report/
+/e2e/.auth/

@@ -11,7 +11,7 @@ export interface OrderItem {
   preco_unitario: number
   observacao: string | null
   cancelado: boolean
-  itens_pedido_opcoes: { opcao_nome: string }[]
+  itens_pedido_opcoes: { opcao_nome: string; opcao?: { ordem: number } | null }[]
 }
 
 /** Pedido com mesa, garçom, itens e os horários de cada etapa */
@@ -45,7 +45,7 @@ const ORDER_SELECT = `
   criado_em, enviado_em, preparo_iniciado_em, pronto_em, entregue_em, finalizado_em, cancelado_em,
   mesa:mesas!pedidos_mesa_id_fkey(numero),
   garcom:usuarios!pedidos_garcom_id_fkey(nome),
-  itens_pedido(id, produto_id, produto_nome, quantidade, preco_unitario, observacao, cancelado, itens_pedido_opcoes(opcao_nome))
+  itens_pedido(id, produto_id, produto_nome, quantidade, preco_unitario, observacao, cancelado, itens_pedido_opcoes(opcao_nome, opcao:opcoes(ordem)))
 `
 
 function normalize(rows: unknown[]) {
@@ -53,7 +53,12 @@ function normalize(rows: unknown[]) {
     ...o,
     subtotal: Number(o.subtotal),
     itens_pedido: [...o.itens_pedido]
-      .map((i) => ({ ...i, preco_unitario: Number(i.preco_unitario) }))
+      .map((i) => ({
+        ...i,
+        preco_unitario: Number(i.preco_unitario),
+        // adicionais sempre na ordem do cardápio (o banco não garante ordem); removidos do cardápio vão por último
+        itens_pedido_opcoes: [...i.itens_pedido_opcoes].sort((a, b) => (a.opcao?.ordem ?? 999) - (b.opcao?.ordem ?? 999)),
+      }))
       .sort((a, b) => Number(a.cancelado) - Number(b.cancelado)),
   }))
 }

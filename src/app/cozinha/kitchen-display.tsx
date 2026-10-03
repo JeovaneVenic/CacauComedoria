@@ -265,7 +265,7 @@ function TicketCard({
         <span
           className={cn(
             "inline-flex items-center gap-1 rounded-full px-3 py-1 text-lg font-extrabold tabular-nums",
-            level === "late" ? "bg-destructive text-white" : level === "warn" ? "bg-status-waiting text-background" : "bg-muted"
+            level === "late" ? "bg-destructive text-background" : level === "warn" ? "bg-status-waiting text-background" : "bg-muted"
           )}
         >
           <Clock className="size-4" aria-hidden />

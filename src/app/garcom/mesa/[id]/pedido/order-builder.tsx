@@ -154,6 +154,7 @@ export function OrderBuilder({ table, waiterName, serviceFeePercent, categories,
       {/* Cardápio */}
       <div className="flex min-h-0 flex-col">
         <div className="grid gap-3 border-b bg-background px-4 pt-3 pb-3 md:px-6">
+          <h1 className="sr-only">Novo pedido · {tableLabel(table.numero)}</h1>
           <div className="flex items-center gap-3">
             <Link
               href={`/garcom/mesa/${tableId}`}

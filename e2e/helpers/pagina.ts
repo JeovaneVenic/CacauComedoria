@@ -1,0 +1,42 @@
+import { expect, type Page, type TestInfo } from "@playwright/test"
+import AxeBuilder from "@axe-core/playwright"
+
+/** Registra erros do console, exceções e respostas 5xx enquanto o teste navega */
+export function vigiarErros(page: Page) {
+  const erros: string[] = []
+  page.on("console", (m) => {
+    if (m.type() !== "error") return
+    const t = m.text()
+    // o Chrome registra no console a resposta 4xx esperada de um teste (ex.: 404 de propósito)
+    if (/Failed to load resource: the server responded with a status of 404/.test(t)) return
+    // falhas de rede provocadas de propósito no teste sem internet
+    if (/ERR_INTERNET_DISCONNECTED|Failed to fetch|NetworkError/.test(t)) return
+    erros.push(`console: ${t}`)
+  })
+  page.on("pageerror", (e) => erros.push(`exceção: ${e.message}`))
+  page.on("response", (r) => {
+    if (r.status() >= 500) erros.push(`HTTP ${r.status()}: ${r.url()}`)
+  })
+  return erros
+}
+
+/** A tela abriu de verdade: título visível e não caiu na página de erro */
+export async function telaCarregou(page: Page) {
+  await expect(page.getByRole("heading", { name: "Não foi possível carregar esta tela" })).toHaveCount(0)
+  await expect(page.locator("h1").first()).toBeVisible()
+}
+
+/** Varredura de acessibilidade (WCAG 2.2 A/AA). Retorna só o que for sério ou crítico. */
+export async function violacoesGraves(page: Page, testInfo: TestInfo, nome: string) {
+  const resultado = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze()
+  await testInfo.attach(`axe-${nome}.json`, { body: JSON.stringify(resultado.violations, null, 2), contentType: "application/json" })
+  return resultado.violations
+    .filter((v) => v.impact === "serious" || v.impact === "critical")
+    .map((v) => `${nome}: [${v.impact}] ${v.id} — ${v.help} (${v.nodes.length}x: ${v.nodes.slice(0, 2).map((n) => n.target.join(" ")).join(" | ")})`)
+}
+
+/** Nada vaza para os lados (sem rolagem horizontal) */
+export async function semRolagemLateral(page: Page) {
+  const { scroll, largura } = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, largura: document.documentElement.clientWidth }))
+  expect(scroll, `largura do conteúdo ${scroll}px > tela ${largura}px`).toBeLessThanOrEqual(largura + 1)
+}

@@ -155,6 +155,27 @@ supabase/
 public/          ícones do app, service worker e página offline
 ```
 
+## Testes automáticos (QA)
+
+Suíte de ponta a ponta com [Playwright](https://playwright.dev) e [axe-core](https://github.com/dequelabs/axe-core), escrita seguindo as práticas do [qa-skills](https://github.com/petrkindlmann/qa-skills) (planejamento por risco, Playwright, acessibilidade e segurança). Roda no Chrome instalado no computador.
+
+| Arquivo | O que verifica |
+|---|---|
+| `01-acesso` | Login (senha errada, campos vazios, saída), bloqueio de telas por perfil e **permissões direto na API** (visitante, garçom, auditoria imutável) |
+| `02-seguranca` | Cabeçalhos de segurança, service worker, manifesto do app, redirecionamento aberto e página 404 |
+| `03-telas` | **Todas as telas** de cada perfil abrem sem erro de console nem falha de servidor, passam na varredura de **acessibilidade WCAG 2.2 AA** (zero violações sérias/críticas) e as do garçom cabem no celular e no tablet |
+| `04-fluxo-mesa` | Fluxo completo com garçom, cozinha e dono ao mesmo tempo: abrir mesa → açaí com adicionais → **pedido sem internet** (fila, sem duplicar) → cozinha prepara → entrega → conta (R$ 35,09) → **pré-conta impressa** → Finalizar → fechar em Pix → mesa livre → auditoria |
+
+Os casos de teste, os resultados de cada rodada e os defeitos encontrados e resolvidos estão em [docs/qa/casos-de-teste.md](docs/qa/casos-de-teste.md).
+
+Como rodar:
+
+1. Crie `.env.e2e.local` (não vai para o Git) com `E2E_BASE_URL`, `E2E_DONO_EMAIL`, `E2E_GARCOM_EMAIL`, `E2E_COZINHA_EMAIL` e `E2E_SENHA` (usuários de demonstração do `seed.sql`).
+2. Gere e suba a versão de produção: `npm run build` e `npm run start -- -p 3001`.
+3. Rode `npm run test:e2e` (ou `npm run test:e2e:ver` para assistir no navegador). O relatório fica em `playwright-report/`.
+
+> Os testes usam o banco configurado no `.env.local` e registram vendas de teste na mesa 04 (que termina livre). Use um projeto Supabase de testes ou os dados de demonstração — nunca o banco do restaurante em operação.
+
 ## Scripts
 
 | Comando | O que faz |
@@ -164,3 +185,5 @@ public/          ícones do app, service worker e página offline
 | `npm run start` | Servidor de produção |
 | `npm run lint` | Verificação de código (ESLint) |
 | `npm run typecheck` | Verificação de tipos (TypeScript) |
+| `npm run test:e2e` | Testes de ponta a ponta (Playwright) contra a versão de produção |
+| `npm run test:e2e:ver` | Os mesmos testes, com o navegador visível |

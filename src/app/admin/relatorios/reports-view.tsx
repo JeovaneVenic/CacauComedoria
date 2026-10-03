@@ -524,7 +524,8 @@ function RankBars({
 function DataTable({ head, rows, align, empty }: { head: string[]; rows: string[][]; align: ("left" | "right")[]; empty: string }) {
   if (rows.length === 0) return <Empty text={empty} />
   return (
-    <div className="max-h-[28rem] overflow-auto rounded-xl border">
+    // rolável: recebe foco para quem navega pelo teclado conseguir rolar
+    <div className="max-h-[28rem] overflow-auto rounded-xl border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label={`Tabela: ${head.join(", ")}`}>
       <table className="w-full text-sm">
         <thead className="sticky top-0 bg-muted text-xs text-muted-foreground">
           <tr>

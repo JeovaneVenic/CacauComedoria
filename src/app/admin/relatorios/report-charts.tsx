@@ -25,7 +25,7 @@ export interface DailyRow {
 export function DailyBars({ rows }: { rows: DailyRow[] }) {
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={rows} barGap={2} barCategoryGap="22%" margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+      <BarChart accessibilityLayer={false} data={rows} barGap={2} barCategoryGap="22%" margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
         <CartesianGrid vertical={false} stroke="var(--border)" />
         <XAxis dataKey="label" tickLine={false} axisLine={false} tick={axisTick} interval="preserveStartEnd" minTickGap={12} />
         <YAxis tickLine={false} axisLine={false} width={64} tick={axisTick} tickFormatter={moneyTick} />
@@ -69,7 +69,7 @@ export interface HourRow {
 export function HourBars({ rows, metric }: { rows: HourRow[]; metric: "pedidos" | "receita" }) {
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={rows} barCategoryGap="18%" margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+      <BarChart accessibilityLayer={false} data={rows} barCategoryGap="18%" margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
         <CartesianGrid vertical={false} stroke="var(--border)" />
         <XAxis dataKey="label" tickLine={false} axisLine={false} tick={axisTick} />
         <YAxis

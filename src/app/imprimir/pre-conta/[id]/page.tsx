@@ -39,7 +39,7 @@ export default async function PreBillPage({ params, searchParams }: PageProps<"/
     if (order.status === "cancelado" || order.status === "devolvido") continue
     for (const item of order.itens_pedido) {
       if (item.cancelado) continue
-      const opcoes = [...item.itens_pedido_opcoes.map((o) => o.opcao_nome), item.observacao].filter(Boolean).join(", ")
+      const opcoes = [...item.itens_pedido_opcoes.map((o) => o.opcao_nome), item.observacao].filter(Boolean).join(" · ")
       const key = `${item.produto_nome}|${opcoes}|${item.preco_unitario}`
       const line = lines.get(key) ?? { nome: item.produto_nome, opcoes, quantidade: 0, total: 0 }
       line.quantidade += item.quantidade

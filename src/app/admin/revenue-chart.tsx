@@ -26,7 +26,7 @@ export function RevenueChart({ serie }: { serie: DashboardData["serie_14_dias"] 
       </div>
       <div className="mt-3 h-64" aria-hidden>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={rows} barGap={2} barCategoryGap="22%" margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+          <BarChart accessibilityLayer={false} data={rows} barGap={2} barCategoryGap="22%" margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <CartesianGrid vertical={false} stroke="var(--border)" />
             <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "var(--muted-foreground)" }} interval="preserveStartEnd" />
             <YAxis
