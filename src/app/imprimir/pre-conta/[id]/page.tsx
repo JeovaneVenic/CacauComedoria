@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { requireRoleWith } from "@/lib/auth"
-import { FLOOR_ROLES } from "@/lib/roles"
+import { FLOOR_ROLES, isManager } from "@/lib/roles"
 import { getCheckoutData } from "@/services/billing"
 import { tableLabel } from "@/lib/format"
 import { AutoPrint } from "./auto-print"
@@ -27,6 +27,7 @@ export default async function PreBillPage({ params, searchParams }: PageProps<"/
   const { id } = await params
   const sp = await searchParams
   const {
+    profile,
     restaurant,
     data: { table, checkout },
   } = await requireRoleWith(FLOOR_ROLES, () => getCheckoutData(id))
@@ -134,7 +135,14 @@ export default async function PreBillPage({ params, searchParams }: PageProps<"/
         <div style={{ textAlign: "center" }}>Confira os itens antes de pagar.</div>
         <div style={{ textAlign: "center", fontWeight: 700 }}>Obrigado pela preferência!</div>
       </main>
-      <AutoPrint auto={sp.auto === "1"} />
+      <AutoPrint
+        auto={sp.auto === "1"}
+        backHref={isManager(profile.papel) ? `/admin/conta/${id}` : `/garcom/mesa/${id}/conta`}
+        homeHref={isManager(profile.papel) ? "/admin" : "/garcom"}
+        atendimentoId={checkout.atendimentoId}
+        billRequested={checkout.billRequested}
+        tableLabel={tableLabel(table.numero)}
+      />
     </>
   )
 }
