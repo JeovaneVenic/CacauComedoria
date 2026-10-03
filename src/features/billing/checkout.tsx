@@ -14,6 +14,7 @@ import { formatCurrency, tableLabel } from "@/lib/format"
 import { toMoneyInput } from "@/lib/image"
 import { cn } from "@/lib/utils"
 import type { OrderRow } from "@/services/orders"
+import { PrintPreBillButton } from "./print-pre-bill-button"
 
 const METHODS: { id: Payment["forma"]; label: string; icon: LucideIcon }[] = [
   { id: "pix", label: "Pix", icon: QrCode },
@@ -33,6 +34,7 @@ function parseMoney(v: string) {
 const round = (n: number) => Math.round(n * 100) / 100
 
 interface CheckoutProps {
+  mesaId: string
   atendimentoId: string
   tableNumber: number
   orders: OrderRow[]
@@ -42,7 +44,7 @@ interface CheckoutProps {
   backHref: string
 }
 
-export function Checkout({ atendimentoId, tableNumber, orders, serviceFeePercent, billRequested, canClose, backHref }: CheckoutProps) {
+export function Checkout({ mesaId, atendimentoId, tableNumber, orders, serviceFeePercent, billRequested, canClose, backHref }: CheckoutProps) {
   const router = useRouter()
   const [noService, setNoService] = useState(false)
   const [discountText, setDiscountText] = useState("")
@@ -109,11 +111,14 @@ export function Checkout({ atendimentoId, tableNumber, orders, serviceFeePercent
             {billRequested && " · conta solicitada"}
           </p>
         </div>
-        {!billRequested && (
-          <Button variant="outline" className="h-12" onClick={askBill} disabled={requesting}>
-            {requesting ? <Loader2 className="animate-spin" /> : <Receipt className="size-5" aria-hidden />} Pedir a conta
-          </Button>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {valid.length > 0 && <PrintPreBillButton mesaId={mesaId} semServico={noService} />}
+          {!billRequested && (
+            <Button variant="outline" className="h-12" onClick={askBill} disabled={requesting}>
+              {requesting ? <Loader2 className="animate-spin" /> : <Receipt className="size-5" aria-hidden />} Pedir a conta
+            </Button>
+          )}
+        </div>
       </header>
 
       {inKitchen.length > 0 && (

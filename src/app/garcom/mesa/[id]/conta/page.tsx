@@ -20,5 +20,5 @@ export default async function WaiterCheckoutPage({ params }: PageProps<"/garcom/
   // o RPC fechar_mesa repete esta regra no banco
   const canClose = isManager(profile.papel) || profile.papel === "caixa" || restaurant.garcom_pode_fechar_mesa
 
-  return <Checkout {...checkout} tableNumber={table.numero} canClose={canClose} backHref={`/garcom/mesa/${id}`} />
+  return <Checkout mesaId={id} {...checkout} tableNumber={table.numero} canClose={canClose} backHref={`/garcom/mesa/${id}`} />
 }

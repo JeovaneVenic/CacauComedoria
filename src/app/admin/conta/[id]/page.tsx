@@ -15,5 +15,5 @@ export default async function AdminCheckoutPage({ params }: PageProps<"/admin/co
   if (!table) notFound()
   if (!checkout) redirect("/admin")
 
-  return <Checkout {...checkout} tableNumber={table.numero} canClose backHref="/admin" />
+  return <Checkout {...checkout} mesaId={id} tableNumber={table.numero} canClose backHref="/admin" />
 }

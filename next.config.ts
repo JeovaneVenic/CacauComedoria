@@ -19,8 +19,9 @@ const csp = [
   "media-src 'self' data:",
   "worker-src 'self'",
   "manifest-src 'self'",
-  "frame-src 'none'",
-  "frame-ancestors 'none'",
+  // iframe só do próprio sistema (impressão da pré-conta); nenhum outro site pode embutir o app
+  "frame-src 'self'",
+  "frame-ancestors 'self'",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -29,8 +30,8 @@ const csp = [
 
 const securityHeaders = [
   { key: "Content-Security-Policy", value: csp },
-  // ninguém consegue embutir o sistema num iframe (proteção contra clickjacking)
-  { key: "X-Frame-Options", value: "DENY" },
+  // só o próprio sistema pode se embutir num iframe (proteção contra clickjacking)
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
