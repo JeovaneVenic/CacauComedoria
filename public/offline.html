@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#b5461c" />
+    <title>Sem conexão · Restaurante do Cacau</title>
+    <style>
+      :root {
+        --bg: #f6f6f7;
+        --card: #ffffff;
+        --text: #1d1f24;
+        --muted: #5c6370;
+        --primary: #b5461c;
+        --accent: #fdf0e8;
+        --border: #e4e5e9;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #131315;
+          --card: #1c1c1f;
+          --text: #f3f3f5;
+          --muted: #a1a5ad;
+          --primary: #f08a52;
+          --accent: #2a1d16;
+          --border: #2c2c31;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 24px 16px;
+        background: var(--bg);
+        color: var(--text);
+        font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+      main {
+        width: 100%;
+        max-width: 420px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 28px 24px;
+        text-align: center;
+      }
+      .mascote {
+        width: 96px;
+        height: 96px;
+        border-radius: 24px;
+        background: var(--accent);
+        display: grid;
+        place-items: center;
+        margin: 0 auto 16px;
+      }
+      .mascote img { width: 80px; height: 80px; }
+      h1 { font-size: 1.4rem; margin: 0 0 8px; letter-spacing: -0.01em; }
+      p { margin: 0 0 12px; color: var(--muted); }
+      ul { text-align: left; color: var(--muted); padding-left: 20px; margin: 0 0 20px; }
+      li { margin-bottom: 6px; }
+      button {
+        width: 100%;
+        height: 48px;
+        border: 0;
+        border-radius: 12px;
+        background: var(--primary);
+        color: #fff;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mascote"><img src="/brand/mascote.png" alt="" /></div>
+      <h1>Sem conexão com a internet</h1>
+      <p>Esta tela ainda não foi aberta neste aparelho, por isso não dá para mostrá-la sem internet.</p>
+      <ul>
+        <li>Pedidos já montados continuam guardados e são enviados sozinhos quando a conexão voltar.</li>
+        <li>Telas abertas antes (mesas, pedidos, cozinha) continuam disponíveis.</li>
+      </ul>
+      <button type="button" onclick="location.reload()">Tentar de novo</button>
+    </main>
+    <script>
+      // volta sozinho quando a internet retornar
+      window.addEventListener("online", () => location.reload())
+    </script>
+  </body>
+</html>

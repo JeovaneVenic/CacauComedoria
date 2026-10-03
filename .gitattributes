@@ -1,0 +1,4 @@
+# quebras de linha padronizadas (LF) para Windows, macOS e Linux
+* text=auto eol=lf
+*.png binary
+*.ico binary
